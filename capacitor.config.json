@@ -1,0 +1,6 @@
+{
+  "appId": "com.nextpay.bank",
+  "appName": "NextPay",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
