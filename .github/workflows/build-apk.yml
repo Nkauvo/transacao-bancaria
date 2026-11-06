@@ -41,15 +41,13 @@ jobs:
         run: |
           set -euxo pipefail
           mkdir -p "$ANDROID_SDK_ROOT"
-          cd "$ANDROID_SDK_ROOT"
+          mkdir -p "$RUNNER_TEMP/android-commandlinetools"
 
-          curl -L -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-          unzip -q -o commandlinetools.zip
-          rm -f commandlinetools.zip
+          curl -fsSL -o "$RUNNER_TEMP/commandlinetools.zip" https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q -o "$RUNNER_TEMP/commandlinetools.zip" -d "$RUNNER_TEMP/android-commandlinetools"
 
           mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools/latest"
-          cp -a "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools/." "$ANDROID_SDK_ROOT/cmdline-tools/latest/"
-          rm -rf "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools"
+          cp -a "$RUNNER_TEMP/android-commandlinetools/cmdline-tools/." "$ANDROID_SDK_ROOT/cmdline-tools/latest/"
 
       - name: Instalar Android SDK packages
         shell: bash
