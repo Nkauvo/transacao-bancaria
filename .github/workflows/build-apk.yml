@@ -9,6 +9,10 @@ on:
 jobs:
   android-build:
     runs-on: ubuntu-latest
+    env:
+      JAVA_VERSION: '21'
+      ANDROID_SDK_ROOT: /opt/android-sdk
+      ANDROID_HOME: /opt/android-sdk
 
     steps:
       - name: Checkout do repositório
@@ -30,7 +34,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: ${{ env.JAVA_VERSION }}
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -38,9 +42,12 @@ jobs:
           cmdline-tools-version: latest
 
       - name: Instalar Android SDK packages
+        shell: bash
         run: |
-          yes | sdkmanager --licenses
-          sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          yes | sdkmanager --licenses >/dev/null
+          sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0" "cmdline-tools;latest"
 
       - name: Instalar Capacitor CLI
         run: npm install -D @capacitor/cli
@@ -49,7 +56,10 @@ jobs:
         run: npx cap sync android
 
       - name: Build APK Debug
-        run: cd android && ./gradlew assembleDebug
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
