@@ -37,17 +37,26 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: latest
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p "$ANDROID_SDK_ROOT"
+          cd "$ANDROID_SDK_ROOT"
+
+          curl -L -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q -o commandlinetools.zip
+          rm -f commandlinetools.zip
+
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+          cp -a "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools/." "$ANDROID_SDK_ROOT/cmdline-tools/latest/"
+          rm -rf "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools"
 
       - name: Instalar Android SDK packages
         shell: bash
         run: |
-          export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
           yes | sdkmanager --licenses >/dev/null
-          sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0" "cmdline-tools;latest"
+          sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Instalar Capacitor CLI
         run: npm install -D @capacitor/cli
